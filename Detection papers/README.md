@@ -16,7 +16,7 @@
 
 
 ![ssd_result](../data_images/ssd_result.png)
-
+* Todo List
 - [ ] SSD+channel pruning
 - [ ] SSD+FPN
 - [ ] SSD+Focal loss
@@ -25,6 +25,8 @@
 | architecture |ImageNet Accuracy| Million Mult-Adds | Million Parameters  |
 | ---- | ---- | ---- | ----- |
 | MobileNet_V1 | 70.6% | 569  | 4.2 |
+
+* Todo List
 - [ ] Mobilev1 + ResNet
 - [ ] Mobilev1 + ResNeXt 
 
@@ -37,6 +39,8 @@
 
 ![imagenet](../data_images/mobileNetv2_coco.png)
 
+* Todo List
+
 ## 4. R-FCN
 | architecture |train data| VOC07 | VOC12 | COCO with Iou=0.5(val/test ) |  inference time (s)|
 | ----         | ----     | ----  | ----- | -------       |   -  |
@@ -48,3 +52,5 @@
 |Faster RCNN+++|  coco trainval | -  | -  |  test-55.7    | 3.36 |
 | R-FCN multi-sc | coco train | - | -     |  val-49.1     | 0.17 |
 | R-FCN multi-sc train,test| coco trainval |-|-| test-__53.2__| 1.00 |
+
+* Todo List
