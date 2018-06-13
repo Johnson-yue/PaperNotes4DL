@@ -20,7 +20,7 @@
 - [ ] SSD+channel pruning
 - [ ] SSD+FPN
 - [ ] SSD+Focal loss
-
+- [ ] SSD+C.Relu 
 ## 2. MobileNet_V1
 | architecture |ImageNet Accuracy| Million Mult-Adds | Million Parameters  |
 | ---- | ---- | ---- | ----- |
@@ -54,3 +54,54 @@
 | R-FCN multi-sc train,test| coco trainval |-|-| test-__53.2__| 1.00 |
 
 * Todo List
+- [ ] I should think something to do
+
+## 5. SE-net
+* SE + ResNet performance（imagenet） :
+![se_resnet](../data_images/se_resnet.png)
+* SE + MobileNet Performance （imagenet）:
+![se_mobile](../data_images/se_mobile.png)
+精度有明显的提升，从计算量来看速度应该都差不多
+* SE + ResNet（COCO）：
+
+    ![coco](../data_images/se_coco.png)
+* Todo List
+- [ ] Maybe Change __Avg Global Pool__ into __Separable Conv Layer__ (such 7x7),original paper implement Mobile .but it don`t my idea. 
+- [ ] Maybe Change __ResNet archit__ into __MobileV2__ (c-> 6*c ->c)
+- [ ] 优化 _global pooling layer_ 和 _small inner-product layer_
+
+## 6. PVA-Net
+
+* ImageNet2012
+
+    | Model |top-1 | top5 | Cost(GMAC) |
+    | ----  | ---- | ---- |--------|
+    | VGG-16| 28.07| 9.33 | 15.3   |
+    |GoogleNet| -  | 9.15 | 1.5    |
+    | ResNet-152| 21.43 | 5.71 |11.3|
+    | ----  | ---- | ---- |--------|
+    |PVANET | 27.66 | 8.84 | 0.6  |
+* VOC07-test(Proposals=200)
+    | Model |Recall(%) | mAP(%) | FPS |
+    |-------|---------|------|----|
+    |PVANET| 98.8 | 84.4| 23.7|
+    |PVANET+vote|98.8|__84.9__|21.7|
+    |PVANET+vote+compressed|98.8|84.4|   __31.3__|
+
+* VOC12-test()
+    | Model |Total Cost (GMAC) | Runing time(ms)| mAP(%)|
+    |-|-|-|-|
+    |PVANet+vote| 27.8| 46 | __84.2__ |
+    |PVANET+compressed|__12.5__|32|83.7|
+    |Faster RCNN+ResNet-101| >206.4|2240|83.8|
+    |Faster RCNN+VGG-16| 204.4| 110 | 75.9|
+    | RFCN + ResNet-101| 122.9|133|82|
+    |SSD512(VGG16)| 86.7 |__53__ |82.2|
+
+
+
+* Todo List
+
+- [ ] rfcn + pva(rpn部分减少计算)，用rfcn替换roi pool
+- [*] svd + pva(fc)
+- [*] pva 去掉bn：  conv-bn  --》 conv

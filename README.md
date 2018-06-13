@@ -68,6 +68,75 @@
 * 训练COCO的时候使用80k的train，40k的val和20k的test。前90k iter的学习率为1e-3，后30k iter 的学习率为1e-4.
 ![rfcn](data_images/rfcn.png)
 
+## 5. SE-Net
+* SE-net 专注于channel之间的关系，SE略微的增加了计算量和网络复杂度，但是inference time几乎不变，精度有提升。
+* 浅层的特征是类别无关的， 深层的特征是类别相关的。
+* 使用attention和gating(eg. softmax and sigmoid)的机制被应用于图像理解（_Spatial transformer networks_， NIPS2015）图像定位（_Capturing top-down visual attention with feedback convolutional neural networks_，ICCV2015），和序列模型（_Joint line segmentation and transcription for endtoend handwritten paragraph recognition_. NIPS20160）（_Learnable pooling with context gating for video classification_. arxiv2017）
+* image caption(_SCA-CNN: Spatial and channel-wise attention in convolutional networks for image captioning_, CVPR2017)(_Show, attend and tell: Neural image caption generation with visual attention_, 2015) and lip reading(_Lip reading sentences in the wild_, CVPR 2017)   
+* attention 机制(_Stacked hourglass networks for human pose estimation_, ECCV2016)(_Residual attention network for image classification_ ,CVPR2017)
+* Squeeze ： global average pool or other 复杂的聚合方法（如 separable conv）
+* Excitation：FC(1x1xC/r) -> relu -> FC(1x1xC) -> sigmoid
+* SE - Inception Module
+
+    ![se-inception](data_images/SE-Inception.png)
+* SE - ResNet Module
+
+    ![se-resnet](data_images/SE-ResNet.png)
+
+* ResNet-50的 forward 和 backward 加一起 190ms， SE-ResNet-50 的total time是209ms。导致实际时间比理论时间要慢的原因是global pooling layer和 small inner-product layer 没有优化。
+
+* 实验中所有的r=16 ， 实验中使用的权重初始化方法为（_Delving deep into rectifiers:Surpassing human-level performance on ImageNet classification_，ICCV2015）
+
+* 最后提交的SE-Net是SE-ResNeXt(64x4d)-154
+
+* 场景分类数据集 - Places-365
+
+## 6. PVA-Net
+
+* 这个又细又深的网络可以使用BN来训练。
+
+*  总的设计原则： 层数多，但每一层的channel数比较少； 在网络的前几层使用 __C.Relu__ （_Understanding and improving convolutional neural networks via concatenated rectified linear units_   . ICML 2016）模块 ；在网络的后几层使用 __Inception__ 模块。
+
+    * Modified C.Relu ： C.Relu提出，在前几个特征层中，卷积得到的结果都是成对出现的，因此C.Relu提出将 [_卷积的输出_] 与 [_取反后的卷积的输出_] concate起来，这样channel的数量就double 了。但是这两个数据公用一个bias。  pvanet提出每个输出都有一个 __独立的bias__ item。 C.Relu的架构如下：
+    
+        ![crelu](data_images/crelu.png)
+    * Inception + ResNet
+
+* 使用新的学习率更新策略： plateau detection
+
+     * 在 一定的iteration 以内，最小的loss没有变化过，则learning rate 就乘以一个decay
+
+* 主要的两个blocks：
+    
+    * mC.Relu
+
+    ![mcrelu](data_images/mCrelu.png) 
+    * Inception
+
+    ![inception](data_images/pva_inception.png)
+
+* pvanet的输入尺寸默认是 ： 1056 x 640 
+* pvanet 网络架构：
+
+    ![pvanet](data_images/pvanet.png)
+* 实验证明 RPN的输入不需要像 FC classify那样深的feature，所以pvanet采用只输入 __128__ 个channel的feature map. (通过这种方法，减少了1.4G Mac的计算量)
+
+* pvanet的RPN采用6种尺度，7种长宽比共42种anchor来预测。最后RPN产生300个anchor。
+
+* 用ImageNet2012 预训练模型参数：
+    * 所有的图像resize 到 256， 384， 512 然后随机crop 到192 x 192
+
+    * 初始学习率 0.1
+
+    * when plateau ，学习率乘 1/ &radic;10 = 0.3165
+
+    * 使用vote方法， 效果好于迭代定位。
+    (Object detection via a  multi-region & semantic segmentationaware CNN model, ICCV2015)
+
+    * FC 层 由“4096-4096” 压缩到“512-4096-512-4096”。 31.3FPS
+
+
+
 # Face 
 
 # GANs
