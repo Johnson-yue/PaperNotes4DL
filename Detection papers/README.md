@@ -105,3 +105,17 @@
 - [ ] rfcn + pva(rpn部分减少计算)，用rfcn替换roi pool
 - [*] svd + pva(fc)
 - [*] pva 去掉bn：  conv-bn  --》 conv
+
+## 7. Refine-Det
+
+* PASCAL VOC 2007
+
+    ![voc07](../data_images/refinedet-voc07.png)
+
+* MS COCO
+
+    ![voc07](../data_images/refinedet-coco.png)
+
+* Todo List：
+
+    类似于FPN，需要看paper：An Analysis of Scale Invariance in Object Detection－SNIP

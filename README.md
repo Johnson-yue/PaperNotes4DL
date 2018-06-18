@@ -136,6 +136,37 @@
     * FC 层 由“4096-4096” 压缩到“512-4096-512-4096”。 31.3FPS
 
 
+## 7. Refine-Det（one-stage）
+* 提出two-stage的三个好处：
+    * 两阶段的方法采用启发式采样来控制类别不均的问题。
+    * 用级联的两步对object box进行回归。
+    * 用两个阶段来描述object （RPN阶段的似物性，以及具体是哪一类）
+
+* Anchor Refine Model的作用：
+    * 移除负样本的anchor来减少分类器的搜索空间。
+    * 粗调定位。
+* Object Detection Model的作用：
+    * 细调anchor然后预测多类标签。
+
+* 三个主要的模块：
+    * Transfer Connection Block的作用：链接ARM层和ODM层，包含deconv操作和sum操作
+
+        ![TCBs](data_images/TCBs.png)
+    * Two-Step 级联回归：先用ARM来粗调一个框，然后用ODM再细调。ARM的输出是 4+1 ，4是anchor坐标，1是似物性得分。ARM生成的anchor与图像的默认分格一一对应。（类似于SSD的default box）
+    * 负的anchor过滤： 在训练阶段，对于refine anchor box，如果负置信度的得分大于预设的阈值（比如0.99）我们将在训练ODM的过程中抛弃它。也就是说我们只通过refine hard negative anchor和refine positive anchor 来训练ODM； 在inference阶段，如果一个refine anchor 的negative confidence大于0.99 则检测的时候抛弃。
+
+* 训练与测试的细节：
+    * 训练时的数据增强： 采用（SSD）论文的方法
+    * backbone用的VGG-16和ResNet-101
+    * 使用L2-norm 在conv4_3, conv5_3, 10,8上
+    * Anchor的选择在空间尺度为 1/8， 1/16， 1/32， 1/64 
+    * 在训练阶段，我们先匹配每一个gt和anchor最好覆盖的，然后再匹配anchor boxes和任意gt覆盖率大于0.5的
+
+    * 选择loss比较高的negative anchor ，让negative anchor与positive anchor的比例为3：1.
+    * loss: 对于ARM， 我们给每一个anchor一个二分类的标签（是不是目标）和它的4个坐标。
+    * 权重初始化方法：xavier
+
+
 
 # Face 
 
