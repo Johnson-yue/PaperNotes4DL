@@ -166,6 +166,75 @@
     * loss: 对于ARM， 我们给每一个anchor一个二分类的标签（是不是目标）和它的4个坐标。
     * 权重初始化方法：xavier
 
+## 8. Light-Head RCNN
+
+* 摘要部分：
+    * 二阶方法慢的原始是因为在ROI前后有很大的计算量。
+    * Faster RCNN使用了2个FC来做ROI的识别； R-FCN使用了大量的score maps来表示ROIs。
+
+    * 这篇文章把网络分成了2部分，特征提取的base部分和用来分类和产生ROI的head部分。Two-stage的方法只所以慢是因为head部分的计算量很大。
+    
+    * Faster RCNN 和 R-FCN都有一个共同的特点，一个重的head加上一个backbone。
+        * Faster RCNN 使用2个大的FC来对ROIs区域进行识别和回归。这个是特别耗时的，尤其是当ROIs特别多的时候；此外RoI pooling产生的channel个数是特别多的，因为在Roi Pooling后面接的 _第一个FC层_ 的计算是特别大的。
+        
+        * R-FCN 为了共享ROI区域的计算，使用了大量的score maps，其数量是 #classes x p x p (p 是pooling的size) 
+    * 这篇文章主要提出的创新点：
+        * large-separable convolution to produce “thin” feature map。feature map的channel个数为&alpha; * p * p , (&alpha;&le;10)
+    * 检测精度最好的two-stage： Mask-RCNN， one-stage: Retina
+
+* 两个主要部分： R-CNN subnet 和 ROI warping
+    * R-CNN subnet：
+    
+        1）与 __R-FCN__ 相比 feature map channel 由（#classes * p * p） 减少到 (10 * 7 * 7) 输入PSRoi pooling。
+        
+        2）因为改变了 channel数，所以不能通过vote来预测结果，在light-head中 采用的方式是使用一层FC来代替vote进行预测。
+        ![rcnn-subnet](data_images/light-head-rcnn-subnet.png)
+    * ROI warping：
+        * 它的主要作用是保证输入到R-CNN subnet的feature map shape是固定的。
+        * 同 R-FCN 一样，不使用ROI pooling 而是使用PSRoi pooling。
+
+* 网络结构之间的比较（注意红色框中的不同）：
+    ![light-head Rcnn](data_images/light-head-approach.png)
+
+* L 网络的backbone是ResNet-101，S 网络的backbone是Xception；backbone网络后面接 __Thin feature maps__ .
+* __Thin feature maps__ 是 由backbone经过large separable conv层得到的。
+    ![large separable conv](data_images/light-head-large-separable-conv.png)
+    其中， L 网络的 _k_ = 15, C<sub>mid</sub> = 256; 而 S 网络的C<sub>mid</sub>= 64. 并且固定C<sub>out</sub> = 10 * p * p（而不是像R-FCN中的#classes * p * p）
+
+* 在RPN后面接了一个NMS
+* R-FCN的 下一个工作就是 [Deformable-ConvNet](https://github.com/msracver/Deformable-ConvNets)
+* 改进了 PSRoi pooling， 增加了 [ROIAlign](Mask RCNN)的功能.
+
+## 9. Mask RCNN
+
+* 摘要：
+    * 与Faster RCNN 相比，新增加了一个mask的分支。5fps，可以用于姿态评估。
+    * 主要的贡献是增加了 实例分割的功能，并且提出了 __Roi Align__ .
+    * mask的预测和类别预测一定要分开，也就是说 每一类都需要预测独立的mask。
+    * 预测mask和预测class是并行的。
+    * 其他的instance-segmentation是先分割，然后在分实例的，而这篇文章是先分实例(instance-first)然后再分割的。
+
+* 对于Faster RCNN的分析（Speed/accuracy trade-offs for modern convolutional object detectors. In CVPR, 2017）
+
+* 训练的loss： 每个ROI的 L = L<sub>cls</sub> + L<sub>box</sub> + L<sub>mask</sub> .
+
+    * 其中 ： L<sub>cls</sub> + L<sub>box</sub> 是 Faster RCNN 里面定义的
+    *  L<sub>mask</sub>  输出的维度是 K * m<sup>2</sup>, _K_ 是类别数，_m*m_ 是 mask的尺寸。每个像素应用sigmoid做2分类。  L<sub>mask</sub>  定义是所有sigmoid二分类的平均loss，k类的mask至于k类的label有关，与其他label无关。这样生成的mask是与类别有关的mask，消除了mask中的类别竞争问题，这是得到好的实例分割的关键！！！
+
+* __ROIAlign__ : 采用插值的方法获得，ROI Pooling得到的量化特征对分类没有影响，但是对pixel-wise的mask会有很大的影响。
+    ![roialign](data_images/mask-rcnn-roialign.png)
+
+* 实验中使用的backbone是 ResNet-or-FPN
+    ![head](data_images/mask-rcnn-head.png)
+
+
+* 训练阶段：
+    * 图像的短边reshape到800，一个GPU上的BS=2，N个ROI， ResNet的N=64；FPN的N=512
+
+* 测试阶段：
+    * ResNet使用300个proposal， FPN使用1000个proposal，mask分支只使用100个检测box。
+    * mask分支每个Roi预测k个mask，但是只使用第k个mask，这里的k是cls预测出来的k。
+    * The gains of Mask R-CNN over come from using RoIAlign (+1.1 APbb), multitask training (+0.9 APbb), and ResNeXt-101 (+1.6 APbb).
 
 
 # Face 

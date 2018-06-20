@@ -55,6 +55,7 @@
 
 * Todo List
 - [ ] I should think something to do
+- [ ] Reading Deformable Conv(Deformable convolutional networks. arXiv preprint arXiv:1703.06211, 2017)
 
 ## 5. SE-net
 * SE + ResNet performance（imagenet） :
@@ -119,3 +120,40 @@
 * Todo List：
 
     类似于FPN，需要看paper：An Analysis of Scale Invariance in Object Detection－SNIP
+
+## 8. Light-Head RCNN
+* Result
+
+    |  Model  | COCO mAP |  Speed(fps) |
+    | ------- | -------- | ----------- |
+    | Xeception-light-head RCNN | 30.7 |  __102__|
+    | ResNet-101-light-head RCNN | __41.5__| - |
+
+* COCO test-dev
+    ![coco](../data_images/light-head-coco.png)
+
+* ImageNet  Xeception-like architecture
+    ![archite](../data_images/light-head-imagenet.png)
+
+* COCO Speed
+
+    ![speed](../data_images/light-head-speed.png)
+
+* Todo List:
+    - [ ] basebone由ResNet-101 换成了Xception，在COCO上达到了30+的mAP，速度是102fps。
+    - [ ] basebone 由ResNet-101 换成 pvanet？
+    - [ ] basebone 由ResNet-101 换成 mobileV1-v2？
+
+## 9. Mask RCNN 
+
+* COCO detection：
+
+    ![objecte](../data_images/mask-rcnn-detection.png)
+
+* Instance Segmentation：
+
+    ![segmentation](../data_images/mask-rcnn-segmentation.png)
+
+* The impact of ROIAlign:
+
+    ![result](../data_images/mask-rcnn-roialign-result.png)
