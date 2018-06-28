@@ -56,6 +56,7 @@
 * Todo List
 - [ ] I should think something to do
 - [ ] Reading Deformable Conv(Deformable convolutional networks. arXiv preprint arXiv:1703.06211, 2017)
+- [ ] Reading R-FCN-3000 (ICCV2017)
 
 ## 5. SE-net
 * SE + ResNet performance（imagenet） :
@@ -157,3 +158,18 @@
 * The impact of ROIAlign:
 
     ![result](../data_images/mask-rcnn-roialign-result.png)
+
+## 10. Deformable Convolution Network
+
+* [PPT](http://www.jifengdai.org/slides/Deformable_Convolutional_Networks_Oral.pdf)
+
+
+## 10. Deformable Convolution Network
+
+* COCO test-dev
+    ![coco result](../data_images/deformable-coco.png)
+
+* Todo List
+    - [ ] 后续工作见 r-fcn-3k
+    - [ ] Deformable Conv 使用的Align-Inception-ResNet 参数太多了，耗时比较长，，需要优化网络结构。比如按照pva的思路来！！。
+    

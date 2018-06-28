@@ -236,6 +236,56 @@
     * mask分支每个Roi预测k个mask，但是只使用第k个mask，这里的k是cls预测出来的k。
     * The gains of Mask R-CNN over come from using RoIAlign (+1.1 APbb), multitask training (+0.9 APbb), and ResNeXt-101 (+1.6 APbb).
 
+## 10. Deformable Convolutional Network
+
+* R-FCN的改进版本1，[github](https://github.com/msracver/Deformable-ConvNets).在论文中主要引入了两个模块 __deformable convolution__ 和 __deformable ROI pooling__ .
+
+* Motivate:
+    克服目标的旋转，多角度等检测问题，现在普遍有2种方法：
+    * 在训练集种根据先验知识来旋转 - 但是对于未知的旋转不能很好的适应。
+    * 手工构造旋转不变性的特征，比如：SIFT等 - 但是手工构造难度比较大，而且效果更不好。
+    * 现有的卷积固定尺寸计算，现在有的pooling固定减少空间尺寸，ROI固定空间采样bin等。
+
+        ![regular](data_images/deformable-regular.png)
+* Deformable Convolution
+
+    deformable conv的示意图：
+    ![conv](data_images/deformable-conv.png)
+
+
+    deformable conv在网络当中的使用示意图：
+    ![deformable conv](data_images/deformable-conv-net.png)
+
+    灵感来源（Spatial transformer networks, NIPS 2015）
+
+    * 在卷积的计算中增加了一个offsets，然后用网络来学习这个offset
+
+* Deformable ROI pooling
+
+    deformable roi pooling的示意图：
+    ![roi pooling](data_images/deformable-roi-pooling.png)
+
+    deformable PSRoi Pooling
+    ![PSroi pooling](data_images/deformable-psroi.png)
+
+    PSRoi Pooling 需要一个归一化的 &delta;p
+
+* 所有的offset都使用0来初始化.
+
+* Deformable 修改了原始的Inception-ResNet网络，因为原始的Inception-ResNet存在 _不对齐_ 的问题，在一个未公开的工作中得到了解决，所以Deformable中也解决了这个问题。
+
+* 容易被集成到任意的卷积网络中，(二阶的最好)。
+
+* 理解Receptive Field  (Understanding the effective receptive field in deep convolutional neural networks.)论文提出，不是所有的pixel都对神经元有贡献，距离中心越近的神经元贡献度越大,实验表明有效的receptive field是 比理论增长的要慢的 是以 _平方根_ 的速度在增长, 因此顶层的神经元是没有足够大的感受野的，因此 空洞卷基（atrous）被广泛的使用来增大感受也。
+
+* Deformable Convolution 是atrous conv的一种一般化的形式。 他和其他工作的区别在于，他不但学习filter 的weights 还学习sample location。
+
+* 他是在 R-FCN的基础上加上了STN 网络。
+
+* Deformable 提出：
+    * 1）default resnet-101默认的感受野(dilation=2)太小，实验中使用大的dilation=4，6，8 都可以使是的精度的提升； 
+    * 2）网络的架构不同（Faster ，deeplab），最合适的dilation也不同（4，6）；因此固定的dilation是不合理的， _学习的dilation_ 才是最好的。
+
 
 # Face 
 
@@ -254,3 +304,5 @@
 # Segmentation
 
 # Tracker
+
+# Capsule
